@@ -1,3 +1,11 @@
+"""
+config.py
+
+This module loads the application configuration from the .env file.
+It provides the Exchange email credentials and server settings
+required to establish a connection.
+"""
+
 from dotenv import load_dotenv
 import os
 

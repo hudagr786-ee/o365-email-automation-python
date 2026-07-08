@@ -1,3 +1,10 @@
+"""
+file_handler.py
+
+This module contains helper functions for file and folder
+operations used throughout the application.
+"""
+
 import os
 
 

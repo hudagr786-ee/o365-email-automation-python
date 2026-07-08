@@ -1,3 +1,11 @@
+"""
+logger.py
+
+This module provides a reusable logging configuration
+for the application.
+
+It helps maintain consistent logging across different modules.
+"""
 import logging
 
 

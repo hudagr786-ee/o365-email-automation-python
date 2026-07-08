@@ -1,11 +1,13 @@
-from email_sender import send_email
+from exchange_connection import connect_to_exchange
+from email_reader import read_latest_emails
 
-print("=" * 50)
-print("Exchange Email Automation")
-print("=" * 50)
 
-try:
-    send_email()
+def main():
 
-except Exception as e:
-    print(e)
+    account = connect_to_exchange()
+
+    read_latest_emails(account)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,6 @@
+exchangelib==5.6.0
+python-dotenv
+requests
+requests_ntlm
+lxml
+cached-property

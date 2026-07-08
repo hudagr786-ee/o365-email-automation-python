@@ -2,21 +2,21 @@
 
 ## Overview
 
-This project is a Python-based email automation application that connects to Microsoft Exchange Server, reads emails, and provides a modular structure for extending email automation features.
+This project is a Python-based email automation application that connects to Microsoft Exchange Server using Exchange Web Services (EWS). The application demonstrates Object-Oriented Programming (OOP) principles by encapsulating all Exchange-related operations within a single service class.
 
-The project follows clean coding practices by separating configuration, connection handling, email operations, and utility functions into individual modules.
+The project supports reading and sending emails while maintaining a clean, modular, and maintainable architecture.
 
 ---
 
 ## Features
 
 - Connect to Microsoft Exchange Server
-- Read latest emails from inbox
+- Read latest emails
 - Send emails
-- Environment variable support using `.env`
-- Modular project structure
-- Reusable utility functions
-- Easy to maintain and extend
+- Secure configuration using environment variables
+- Encapsulation using a single service class
+- Utility modules for logging and file handling
+- Clean and maintainable project structure
 
 ---
 
@@ -31,9 +31,7 @@ PythonProject/
 │   └── file_handler.py
 │
 ├── config.py
-├── exchange_connection.py
-├── email_reader.py
-├── email_sender.py
+├── exchange_service.py
 ├── main.py
 │
 ├── .env
@@ -54,33 +52,33 @@ PythonProject/
 
 ## Installation
 
-Clone the repository:
+Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-username/o365-email-automation-python.git
 ```
 
-Move into the project directory:
+Move to project directory
 
 ```bash
-cd PythonProject
+cd o365-email-automation-python
 ```
 
-Create a virtual environment:
+Create virtual environment
 
 ```bash
 python -m venv .venv
 ```
 
-Activate the virtual environment:
+Activate virtual environment
 
-### Windows
+Windows
 
 ```bash
 .venv\Scripts\activate
 ```
 
-Install dependencies:
+Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -90,21 +88,19 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Create a `.env` file in the project root.
+Create a `.env` file.
 
-Example:
+Example
 
 ```env
 EMAIL=your_email@example.com
 PASSWORD=your_password
-EWS_URL=https://your_server/EWS/Exchange.asmx
+EWS_URL=https://your-server/EWS/Exchange.asmx
 ```
 
 ---
 
-## Running the Project
-
-Run the application:
+## Run the Project
 
 ```bash
 python main.py
@@ -112,52 +108,46 @@ python main.py
 
 ---
 
-## Module Description
+## Project Modules
 
 ### config.py
 
-Loads environment variables from the `.env` file.
+Loads environment variables.
 
-### exchange_connection.py
+### exchange_service.py
 
-Creates and returns a connection to Microsoft Exchange Server.
+Responsible for:
 
-### email_reader.py
+- Connecting to Microsoft Exchange Server
+- Reading emails
+- Sending emails
 
-Reads emails from the mailbox.
-
-### email_sender.py
-
-Creates and sends emails.
+This class encapsulates all Exchange-related functionality.
 
 ### utils/logger.py
 
-Provides a reusable logging configuration for the application.
+Provides reusable logging configuration.
 
 ### utils/file_handler.py
 
-Contains reusable helper functions for file and folder operations.
+Provides reusable helper functions for file and folder operations.
 
 ### main.py
 
-Application entry point.
+Application entry point that creates an instance of `ExchangeService` and invokes its methods.
 
 ---
 
-## Software Design
+## Object-Oriented Design
 
-This project follows the **Single Responsibility Principle (SRP)**.
+This project demonstrates:
 
-Each module is responsible for a single task:
+- Encapsulation
+- Modular Design
+- Code Reusability
+- Separation of Concerns
 
-- Configuration Management
-- Exchange Connection
-- Email Reading
-- Email Sending
-- Utility Functions
-- Application Execution
-
-This modular design improves readability, maintainability, and scalability.
+The Exchange connection and email operations are encapsulated inside the `ExchangeService` class, exposing only public methods to the application while hiding implementation details.
 
 ---
 
@@ -165,6 +155,6 @@ This modular design improves readability, maintainability, and scalability.
 
 **Huda**
 
-Electrical Engineering (Telecommunication)
+Electrical Engineer (Telecommunication)
 
-Python Intern
+IT Intern

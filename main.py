@@ -1,12 +1,17 @@
-from exchange_connection import connect_to_exchange
-from email_reader import read_latest_emails
+from exchange_service import ExchangeService
 
 
 def main():
 
-    account = connect_to_exchange()
+    service = ExchangeService()
 
-    read_latest_emails(account)
+    service.read_emails()
+
+    # service.send_email(
+    #     receiver="abc@example.com",
+    #     subject="Hello",
+    #     body="Testing..."
+    # )
 
 
 if __name__ == "__main__":

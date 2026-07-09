@@ -1,22 +1,47 @@
-# Exchange Email Automation using Python
+# Exchange Email Automation System
 
 ## Overview
 
-This project is a Python-based email automation application that connects to Microsoft Exchange Server using Exchange Web Services (EWS). The application demonstrates Object-Oriented Programming (OOP) principles by encapsulating all Exchange-related operations within a single service class.
+Exchange Email Automation System is a Python-based application that integrates with Microsoft Exchange Server to automate email operations.
 
-The project supports reading and sending emails while following a clean, modular, and maintainable architecture.
+The project provides a backend service for connecting with Exchange Server, reading emails, sending emails, and detecting new incoming emails. A FastAPI-based API layer and HTML dashboard have been added to demonstrate client-server communication and real-time email monitoring using polling.
 
 ---
 
 ## Features
 
-- Connect to Microsoft Exchange Server
-- Read the latest emails from the inbox
-- Send emails
-- Secure configuration using environment variables
-- Encapsulation using the `ExchangeService` class
-- Modular and maintainable code structure
-- Easy to extend for future email automation tasks
+* Connects with Microsoft Exchange Server using Exchange Web Services (EWS)
+* Reads latest emails from inbox
+* Sends emails automatically
+* Detects newly received emails
+* REST API implementation using FastAPI
+* Web-based email monitoring dashboard
+* Client-server communication
+* Automatic email checking using polling
+* Clean separation between API layer and service layer
+* Secure configuration using environment variables
+
+---
+
+## System Architecture
+
+```
+                 Browser Client
+                       |
+                       |
+              HTML Dashboard
+                       |
+              Polling Every 5 Seconds
+                       |
+                       |
+              FastAPI Backend
+                       |
+                       |
+              ExchangeService
+                       |
+                       |
+          Microsoft Exchange Server
+```
 
 ---
 
@@ -24,61 +49,72 @@ The project supports reading and sending emails while following a clean, modular
 
 ```
 PythonProject/
+
 │
-├── utils/
-│   ├── __init__.py
-│   ├── logger.py
-│   └── file_handler.py
+├── app.py
+│       FastAPI application and API endpoints
+│
+├── exchange_service.py
+│       Exchange Server operations
 │
 ├── config.py
-├── exchange_service.py
-├── main.py
+│       Configuration and environment variables
 │
-├── .env
-├── .gitignore
+├── static/
+│       └── index.html
+│              Email monitoring dashboard
+│
+├── utils/
+│       ├── logger.py
+│       └── file_handler.py
+│
+├── requirements.txt
+│
 ├── README.md
-└── requirements.txt
+│
+└── .env
+        Sensitive credentials
 ```
 
 ---
 
 ## Technologies Used
 
-- Python 3.x
-- exchangelib
-- python-dotenv
+* Python
+* FastAPI
+* Exchange Web Services (EWS)
+* exchangelib
+* HTML/CSS/JavaScript
+* Uvicorn
+* dotenv
 
 ---
 
 ## Installation
 
-### Clone the repository
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/hudagr786-ee/o365-email-automation-python.git
+git clone <repository-url>
 ```
 
-### Navigate to the project directory
-
-```bash
-cd o365-email-automation-python
-```
-
-### Create a virtual environment
+### 2. Create Virtual Environment
 
 ```bash
 python -m venv .venv
 ```
 
-### Activate the virtual environment
+Activate environment:
 
-#### Windows
+Windows:
 
 ```bash
 .venv\Scripts\activate
 ```
 
-### Install dependencies
+---
+
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -86,82 +122,162 @@ pip install -r requirements.txt
 
 ---
 
-## Configuration
+## Environment Configuration
 
-Create a `.env` file in the project root.
+Create a `.env` file in the project directory:
 
-Example:
-
-```env
-EMAIL=your_email@example.com
-PASSWORD=your_password
-EWS_URL=https://your-server/EWS/Exchange.asmx
 ```
+EMAIL=your_email
+PASSWORD=your_password
+EWS_URL=exchange_server_url
+```
+
+The application loads credentials securely using environment variables.
 
 ---
 
 ## Running the Application
 
-Run the application using:
+Start the FastAPI server:
 
 ```bash
-python main.py
+uvicorn app:app --reload
+```
+
+The server will run at:
+
+```
+http://127.0.0.1:8000
 ```
 
 ---
 
-## Project Modules
+## API Endpoints
 
-### config.py
+### Home Endpoint
 
-Loads environment variables from the `.env` file and provides the application configuration.
+```
+GET /
+```
 
-### exchange_service.py
-
-Contains the `ExchangeService` class, which encapsulates all Exchange-related operations.
-
-Responsibilities include:
-
-- Establishing a connection to Microsoft Exchange Server
-- Reading emails from the inbox
-- Sending emails
-
-### utils/logger.py
-
-Provides a reusable logging configuration for the application.
-
-### utils/file_handler.py
-
-Provides reusable helper functions for file and directory operations.
-
-### main.py
-
-Acts as the application's entry point by creating an instance of `ExchangeService` and invoking the required email operations.
+Returns API status information.
 
 ---
 
-## Software Design
+### Email Monitoring Endpoint
 
-This project follows modern software engineering principles, including:
+```
+GET /check-new-email
+```
 
-- Object-Oriented Programming (OOP)
-- Encapsulation
-- Modular Design
-- Code Reusability
-- Separation of Concerns
+Checks Exchange inbox for newly received emails.
 
-The `ExchangeService` class encapsulates all Exchange-related functionality, exposing only the required methods while hiding the implementation details of the Exchange connection.
+Example response:
+
+```json
+{
+    "new_email": true,
+    "subject": "Meeting Update"
+}
+```
 
 ---
 
-## Future Enhancements
+### Dashboard
 
-- Read emails based on filters
-- Send emails with attachments
-- HTML email support
-- Email search functionality
-- Logging and exception handling
-- Configuration through external configuration files
+```
+GET /dashboard
+```
+
+Opens the email monitoring dashboard.
+
+The dashboard automatically checks for new emails every 5 seconds.
+
+---
+
+## How Polling Works
+
+The frontend dashboard acts as a client.
+
+Flow:
+
+```
+Browser
+   |
+   |
+Every 5 seconds
+   |
+   |
+GET /check-new-email
+   |
+   |
+FastAPI Server
+   |
+   |
+ExchangeService
+   |
+   |
+Exchange Server
+```
+
+If a new email is detected, the dashboard updates automatically.
+
+---
+
+## ExchangeService Design
+
+The `ExchangeService` class handles all Exchange-related operations:
+
+* Establishing Exchange connection
+* Reading emails
+* Sending emails
+* Detecting new emails
+
+Keeping Exchange operations separate improves:
+
+* Code maintainability
+* Reusability
+* Scalability
+
+---
+
+## API Documentation
+
+FastAPI automatically provides interactive documentation.
+
+Swagger UI:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## Future Improvements
+
+Possible enhancements:
+
+* Replace polling with WebSocket-based real-time notifications
+* Add database storage for email history
+* Add authentication using OAuth2
+* Migrate from Exchange Web Services (EWS) to Microsoft Graph API
+* Add background email monitoring service
+* Improve logging and monitoring
+* Add automated testing
+
+---
+
+## Learning Outcomes
+
+Through this project, the following concepts were implemented:
+
+* Backend API development
+* Client-server architecture
+* REST API communication
+* Microsoft Exchange integration
+* Python service layer design
+* Frontend-backend interaction
+* Email automation workflow
 
 ---
 
@@ -169,6 +285,5 @@ The `ExchangeService` class encapsulates all Exchange-related functionality, exp
 
 **Huda**
 
-Electrical Engineer(Telecommunication)
-
-IT Intern
+Electrical Engineering Student
+Telecommunication Domain

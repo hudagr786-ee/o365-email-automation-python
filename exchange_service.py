@@ -1,47 +1,31 @@
-"""
-exchange_service.py
-
-This module provides the ExchangeService class, which encapsulates
-all Exchange-related operations, including establishing the
-connection, reading emails, and sending emails.
-
-It serves as the central service for email automation.
-"""
+import logging
+import os
+import re
 
 from exchangelib import (
     Credentials,
     Configuration,
     Account,
     DELEGATE,
-    Message,
-    Mailbox
+    FileAttachment
 )
 
-from config import EMAIL, PASSWORD, EWS_URL
+from config import (
+    EMAIL,
+    PASSWORD,
+    EWS_URL
+)
 
 
 class ExchangeService:
-    """
-    Manages Exchange server operations through a single service class.
-
-    This class establishes the Exchange connection and provides
-    methods for reading and sending emails.
-    """
 
     def __init__(self):
-        """
-        Initializes the Exchange service by establishing
-        a connection to the Exchange server.
-        """
+
+        self.logger = logging.getLogger("exchange")
+
         self.account = self._connect()
 
     def _connect(self):
-        """
-        Creates and returns an authenticated Exchange account.
-
-        Returns:
-            Account: Authenticated Exchange account.
-        """
 
         credentials = Credentials(
             username=EMAIL,
@@ -60,54 +44,231 @@ class ExchangeService:
             access_type=DELEGATE
         )
 
+        self.logger.info(
+            "Exchange connection successful"
+        )
+
         return account
+    def clean_email_body(self, body):
 
-    def read_emails(self, limit=5):
         """
-        Retrieves and displays the latest emails from the inbox.
+        Returns only the newest message.
+        Removes Outlook quoted history.
+        """
 
-        Args:
-            limit (int): Number of emails to retrieve.
-        """
+        if body is None:
+            return ""
+
+        body = str(body)
+
+        markers = [
+
+            "\nFrom:",
+            "\r\nFrom:",
+
+            "\nSent:",
+            "\r\nSent:",
+
+            "-----Original Message-----",
+
+            "\nSubject:",
+            "\r\nSubject:"
+        ]
+
+        cleaned = body
+
+        for marker in markers:
+
+            if marker in cleaned:
+
+                cleaned = cleaned.split(marker)[0]
+
+        cleaned = re.sub(
+            r"\n{3,}",
+            "\n\n",
+            cleaned
+        )
+
+        return cleaned.strip()
+
+
+    def is_reply(self, subject):
+
+        if not subject:
+            return False
+
+        subject = subject.upper()
+
+        return (
+            subject.startswith("RE:")
+            or subject.startswith("FW:")
+            or subject.startswith("FWD:")
+        )
+    def read_emails(self, limit=10):
+
+        emails = []
+
+        self.logger.info(
+            f"Reading latest {limit} emails"
+        )
 
         messages = (
-            self.account.inbox
+            self.account
+            .inbox
             .all()
             .order_by("-datetime_received")[:limit]
         )
 
-        for index, message in enumerate(messages, start=1):
+        for message in messages:
 
-            print("=" * 80)
-            print(f"Email #{index}")
-            print("=" * 80)
+            attachments = []
 
-            print("Subject :", message.subject)
-            print("Sender  :", message.sender)
-            print("Received:", message.datetime_received)
-            print("Body:")
-            print(message.text_body)
-            print()
+            # -----------------------------
+            # Handle Attachments
+            # -----------------------------
+            if message.has_attachments:
 
-    def send_email(self, receiver, subject, body):
-        """
-        Creates and sends an email.
+                self.logger.info(
+                    f"Attachments detected in email: {message.subject}"
+                )
 
-        Args:
-            receiver (str): Recipient email address.
-            subject (str): Email subject.
-            body (str): Email message body.
-        """
+                for attachment in message.attachments:
 
-        message = Message(
-            account=self.account,
-            subject=subject,
-            body=body,
-            to_recipients=[
-                Mailbox(email_address=receiver)
-            ]
-        )
+                    self.logger.info(
+                        f"Attachment type: {type(attachment)}"
+                    )
 
-        message.send()
+                    self.logger.info(
+                        f"Attachment name: {attachment.name}"
+                    )
 
-        print("Email sent successfully.")
+                    if isinstance(attachment, FileAttachment):
+
+                        os.makedirs(
+                            "attachments",
+                            exist_ok=True
+                        )
+
+                        file_path = os.path.join(
+                            "attachments",
+                            attachment.name
+                        )
+
+                        with open(file_path, "wb") as file:
+
+                            file.write(
+                                attachment.content
+                            )
+
+                        self.logger.info(
+                            f"Saved attachment: {attachment.name}"
+                        )
+
+                        attachments.append(
+                            {
+                                "name": attachment.name,
+                                "size": attachment.size,
+                                "url": f"/attachments/{attachment.name}"
+                            }
+                        )
+
+            # -----------------------------
+            # Conversation ID
+            # -----------------------------
+            try:
+
+                conversation_id = str(
+                    message.conversation_id.id
+                )
+
+            except Exception:
+
+                conversation_id = ""
+
+            # -----------------------------
+            # Sender
+            # -----------------------------
+            sender = ""
+
+            try:
+
+                if message.sender:
+
+                    sender = message.sender.email_address
+
+            except Exception:
+
+                sender = ""
+
+            # -----------------------------
+            # Email Body
+            # -----------------------------
+
+            # Plain text (for automation and parsing)
+            body_text = self.clean_email_body(
+                message.text_body
+            )
+
+            # HTML (for displaying like Outlook)
+            body_html = ""
+
+            try:
+                if message.body:
+                    body_html = str(message.body)
+                    body_html = re.sub(
+                        r'margin\s*:\s*[^;"\']+',
+                        'margin:5px',
+                        body_html,
+                        flags=re.IGNORECASE
+                    )
+
+                    body_html = re.sub(
+                        r'padding\s*:\s*[^;"\']+',
+                        'padding:2px',
+                        body_html,
+                        flags=re.IGNORECASE
+                    )
+
+                    body_html = body_html.replace("&nbsp;", " ")
+            except Exception:
+                body_html = ""
+
+            # -----------------------------
+            # Date & Time
+            # -----------------------------
+            received = message.datetime_received.strftime(
+                "%d %b %Y %I:%M %p"
+            )
+
+            # -----------------------------
+            # Reply Detection
+            # -----------------------------
+            reply = self.is_reply(
+                message.subject
+            )
+
+            # -----------------------------
+            # Build JSON
+            # -----------------------------
+            emails.append({
+
+                "conversation_id": conversation_id,
+
+                "subject": message.subject,
+
+                "sender": sender,
+
+                "received": received,
+
+                "is_reply": reply,
+
+                "body_text": body_text,
+
+                "body_html": body_html,
+
+                "has_attachments": message.has_attachments,
+
+                "attachments": attachments
+
+            })
+        return emails

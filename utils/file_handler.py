@@ -1,13 +1,20 @@
 """
 file_handler.py
 
-This module contains helper functions for file and folder
-operations used throughout the application.
+Provides reusable file handling utilities.
 """
 
 import os
 
 
 def create_folder(path):
+    """
+    Creates a folder if it does not exist.
+
+    Args:
+        path (str)
+    """
+
     if not os.path.exists(path):
+
         os.makedirs(path)

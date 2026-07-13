@@ -1,18 +1,56 @@
 """
 logger.py
 
-This module provides a reusable logging configuration
-for the application.
-
-It helps maintain consistent logging across different modules.
+Provides application logging.
 """
+
 import logging
+import os
+
 
 
 def get_logger():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s"
+
+    if not os.path.exists("logs"):
+
+        os.makedirs("logs")
+
+
+    logger = logging.getLogger(
+        "exchange_logger"
     )
 
-    return logging.getLogger()
+
+    logger.setLevel(
+        logging.INFO
+    )
+
+
+    if not logger.handlers:
+
+
+        file_handler = logging.FileHandler(
+
+            "logs/app.log"
+
+        )
+
+
+        formatter = logging.Formatter(
+
+            "%(asctime)s | %(levelname)s | %(message)s"
+
+        )
+
+
+        file_handler.setFormatter(
+            formatter
+        )
+
+
+        logger.addHandler(
+            file_handler
+        )
+
+
+    return logger

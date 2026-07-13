@@ -2,67 +2,78 @@
 
 ## Overview
 
-Exchange Email Automation System is a Python-based application that integrates with Microsoft Exchange Server to automate email operations.
+The **Exchange Email Automation System** is a Python-based application that integrates with Microsoft Exchange Server using **Exchange Web Services (EWS)**.
 
-The project provides a backend service for connecting with Exchange Server, reading emails, sending emails, and detecting new incoming emails. A FastAPI-based API layer and HTML dashboard have been added to demonstrate client-server communication and real-time email monitoring using polling.
+The project provides a complete email automation solution capable of reading emails, sending emails, monitoring new incoming emails, detecting attachments, and displaying Outlook emails through a modern FastAPI web dashboard.
 
----
-
-## Features
-
-* Connects with Microsoft Exchange Server using Exchange Web Services (EWS)
-* Reads latest emails from inbox
-* Sends emails automatically
-* Detects newly received emails
-* REST API implementation using FastAPI
-* Web-based email monitoring dashboard
-* Client-server communication
-* Automatic email checking using polling
-* Clean separation between API layer and service layer
-* Secure configuration using environment variables
+The application follows a clean modular architecture using Object-Oriented Programming (OOP), making it maintainable, scalable, and easy to extend.
 
 ---
 
-## System Architecture
+# Features
+
+- Connects securely to Microsoft Exchange Server (EWS)
+- Reads the latest emails from the inbox
+- Sends emails directly through Python
+- Detects newly received emails
+- Displays the latest 5 emails
+- Preserves HTML email formatting
+- Detects email replies and forwards
+- Automatically downloads email attachments
+- Allows attachment download from the dashboard
+- Displays sender, subject, received date, and email body
+- Live dashboard with automatic refresh every 5 seconds
+- Search emails by subject or sender
+- Email statistics dashboard
+- REST API built using FastAPI
+- Secure credential management using `.env`
+- Modular Object-Oriented architecture
+
+---
+
+# System Architecture
 
 ```
-                 Browser Client
-                       |
-                       |
-              HTML Dashboard
-                       |
-              Polling Every 5 Seconds
-                       |
-                       |
-              FastAPI Backend
-                       |
-                       |
-              ExchangeService
-                       |
-                       |
-          Microsoft Exchange Server
+                    Browser Client
+                           │
+                           │
+                HTML / CSS / JavaScript
+                           │
+                 Auto Refresh (5 Seconds)
+                           │
+                           ▼
+                    FastAPI Backend
+                           │
+                           ▼
+                  ExchangeService Class
+                           │
+                           ▼
+             Microsoft Exchange Server (EWS)
 ```
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```
 PythonProject/
 
 │
 ├── app.py
-│       FastAPI application and API endpoints
+│       FastAPI application
 │
 ├── exchange_service.py
-│       Exchange Server operations
+│       Handles Exchange Server operations
 │
 ├── config.py
-│       Configuration and environment variables
+│       Loads environment variables
 │
 ├── static/
 │       └── index.html
 │              Email monitoring dashboard
+│
+├── attachments/
+│       Downloaded email attachments
 │
 ├── utils/
 │       ├── logger.py
@@ -73,40 +84,44 @@ PythonProject/
 ├── README.md
 │
 └── .env
-        Sensitive credentials
+        Exchange credentials
 ```
 
 ---
 
-## Technologies Used
+# Technologies Used
 
-* Python
-* FastAPI
-* Exchange Web Services (EWS)
-* exchangelib
-* HTML/CSS/JavaScript
-* Uvicorn
-* dotenv
+- Python
+- FastAPI
+- Exchange Web Services (EWS)
+- exchangelib
+- HTML
+- CSS
+- JavaScript
+- Uvicorn
+- python-dotenv
 
 ---
 
-## Installation
+# Installation
 
-### 1. Clone the Repository
+## 1. Clone Repository
 
 ```bash
 git clone <repository-url>
 ```
 
-### 2. Create Virtual Environment
+---
+
+## 2. Create Virtual Environment
 
 ```bash
 python -m venv .venv
 ```
 
-Activate environment:
+Activate the environment:
 
-Windows:
+### Windows
 
 ```bash
 .venv\Scripts\activate
@@ -114,7 +129,7 @@ Windows:
 
 ---
 
-### 3. Install Dependencies
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -122,21 +137,21 @@ pip install -r requirements.txt
 
 ---
 
-## Environment Configuration
+# Environment Variables
 
-Create a `.env` file in the project directory:
+Create a `.env` file inside the project folder.
 
-```
-EMAIL=your_email
+```env
+EMAIL=your_email@example.com
 PASSWORD=your_password
-EWS_URL=exchange_server_url
+EWS_URL=https://your-exchange-server/EWS/Exchange.asmx
 ```
 
-The application loads credentials securely using environment variables.
+The application securely loads these credentials using **python-dotenv**.
 
 ---
 
-## Running the Application
+# Running the Application
 
 Start the FastAPI server:
 
@@ -144,7 +159,7 @@ Start the FastAPI server:
 uvicorn app:app --reload
 ```
 
-The server will run at:
+The application will be available at:
 
 ```
 http://127.0.0.1:8000
@@ -152,100 +167,157 @@ http://127.0.0.1:8000
 
 ---
 
-## API Endpoints
+# Dashboard
 
-### Home Endpoint
+Open:
+
+```
+http://127.0.0.1:8000/dashboard
+```
+
+The dashboard provides:
+
+- Latest 5 emails
+- Email subject
+- Sender information
+- Received date & time
+- HTML email preview
+- Attachment detection
+- Attachment download
+- Email search
+- Live updates every 5 seconds
+
+---
+
+# API Endpoints
+
+## Home
 
 ```
 GET /
 ```
 
-Returns API status information.
+Returns application status.
 
 ---
 
-### Email Monitoring Endpoint
+## Latest Emails
 
 ```
-GET /check-new-email
+GET /emails
 ```
 
-Checks Exchange inbox for newly received emails.
+Returns the latest emails from Exchange Server.
 
-Example response:
+Example:
 
 ```json
 {
-    "new_email": true,
-    "subject": "Meeting Update"
+  "count": 5,
+  "emails": [
+    {
+      "subject": "Project Update",
+      "sender": "user@example.com",
+      "received": "10 Jul 2026 11:30 AM",
+      "has_attachments": true
+    }
+  ]
 }
 ```
 
 ---
 
-### Dashboard
+## Check New Email
+
+```
+GET /check-new-email
+```
+
+Detects whether a new email has arrived.
+
+Example:
+
+```json
+{
+    "new_email": true,
+    "subject": "Meeting Schedule"
+}
+```
+
+---
+
+## Download Attachment
+
+```
+GET /attachments/{filename}
+```
+
+Downloads a saved email attachment.
+
+---
+
+## Dashboard
 
 ```
 GET /dashboard
 ```
 
-Opens the email monitoring dashboard.
-
-The dashboard automatically checks for new emails every 5 seconds.
+Opens the live Exchange Email Monitor dashboard.
 
 ---
 
-## How Polling Works
-
-The frontend dashboard acts as a client.
-
-Flow:
+# Email Monitoring Workflow
 
 ```
-Browser
-   |
-   |
-Every 5 seconds
-   |
-   |
-GET /check-new-email
-   |
-   |
-FastAPI Server
-   |
-   |
+Browser Dashboard
+        │
+        │
+Auto Refresh (5 sec)
+        │
+        ▼
+FastAPI API
+        │
+        ▼
 ExchangeService
-   |
-   |
+        │
+        ▼
 Exchange Server
+        │
+        ▼
+Latest Emails Returned
+        │
+        ▼
+Dashboard Updated
 ```
 
-If a new email is detected, the dashboard updates automatically.
+---
+
+# ExchangeService Responsibilities
+
+The `ExchangeService` class is responsible for:
+
+- Establishing Exchange Server connection
+- Reading inbox emails
+- Sending emails
+- Cleaning email body
+- Detecting replies and forwards
+- Processing HTML emails
+- Detecting attachments
+- Saving attachments
+- Returning email data to FastAPI
+
+This separation improves:
+
+- Maintainability
+- Scalability
+- Code Reusability
+- Encapsulation
 
 ---
 
-## ExchangeService Design
+# FastAPI Documentation
 
-The `ExchangeService` class handles all Exchange-related operations:
-
-* Establishing Exchange connection
-* Reading emails
-* Sending emails
-* Detecting new emails
-
-Keeping Exchange operations separate improves:
-
-* Code maintainability
-* Reusability
-* Scalability
-
----
-
-## API Documentation
-
-FastAPI automatically provides interactive documentation.
-
-Swagger UI:
+Interactive Swagger documentation is available at:
 
 ```
 http://127.0.0.1:8000/docs
@@ -253,37 +325,58 @@ http://127.0.0.1:8000/docs
 
 ---
 
-## Future Improvements
+# Security
 
-Possible enhancements:
+Sensitive credentials are never hardcoded.
 
-* Replace polling with WebSocket-based real-time notifications
-* Add database storage for email history
-* Add authentication using OAuth2
-* Migrate from Exchange Web Services (EWS) to Microsoft Graph API
-* Add background email monitoring service
-* Improve logging and monitoring
-* Add automated testing
+The application uses:
 
----
+- `.env`
+- python-dotenv
 
-## Learning Outcomes
-
-Through this project, the following concepts were implemented:
-
-* Backend API development
-* Client-server architecture
-* REST API communication
-* Microsoft Exchange integration
-* Python service layer design
-* Frontend-backend interaction
-* Email automation workflow
+to securely load Exchange credentials.
 
 ---
 
-## Author
+# Future Improvements
+
+Possible future enhancements include:
+
+- Microsoft Graph API integration
+- OAuth2 Authentication
+- WebSocket real-time notifications
+- Background email monitoring service
+- Email database storage
+- Pagination
+- Email filtering
+- Unit testing
+- Docker deployment
+
+---
+
+# Learning Outcomes
+
+This project demonstrates:
+
+- Python Object-Oriented Programming
+- Microsoft Exchange Server Integration
+- Exchange Web Services (EWS)
+- FastAPI Development
+- REST API Design
+- Client-Server Architecture
+- HTML Email Rendering
+- Attachment Handling
+- Backend-Frontend Communication
+- Polling Mechanism
+- Environment Variable Management
+- Modular Software Design
+
+---
+
+# Author
 
 **Huda**
 
-Electrical Engineering Student
-Telecommunication Domain
+Electrical Engineering Student (Telecommunication)
+
+Python Developer | FastAPI | Exchange Email Automation
